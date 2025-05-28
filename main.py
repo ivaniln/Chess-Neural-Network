@@ -1,6 +1,6 @@
 import numpy as np
-
-inputs = [1, 2, 3, 4]
+import nnfs
+from nnfs.datasets import spiral_data
 
 class Layer_Dense:
     def __init__(self, n_inputs, n_neurons):
@@ -9,25 +9,26 @@ class Layer_Dense:
     def forward(self, inputs):
         self.output = np.dot(inputs, self.weights) + self.biases
 
-layer1 = Layer_Dense(4, 8)
-layer2 = Layer_Dense(8, 16)
-layer3 = Layer_Dense(16, 8)
-layer4 = Layer_Dense(8, 4)
+class Activation_ReLU:
+    def forward(self, inputs):
+        self.output = np.maximum(0, inputs)
 
-while True:
-    
-    n = int(input())
-    inputs = []
-    for i in range(n):
-        a = int(input())
-        inputs.append(a)
+class Activation_Softmax:
+    def forward(self, inputs):
+        exp_values = np.exp(inputs - np.max(inputs, axis=1, keepdims=True))
+        probabilities = exp_values / np.sum(exp_values, axis=1, keepdims=True)
+        self.output = probabilities
 
-    layer1.forward(inputs)
-    layer2.forward(layer1.output)
-    layer3.forward(layer2.output)
-    layer4.forward(layer3.output)
+X, y = spiral_data(samples=5, classes=1)
 
-    print(layer1.output)
-    print(layer2.output)
-    print(layer3.output)
-    print(layer4.output)
+dense1 = Layer_Dense(2, 8)
+activation1 = Activation_ReLU()
+dense2 = Layer_Dense(8, 4)
+activation2 = Activation_Softmax()
+
+dense1.forward(X)
+activation1.forward(dense1.output)
+dense2.forward(activation1.output)
+activation2.forward(dense2.output)
+
+print(activation2.output)
