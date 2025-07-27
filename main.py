@@ -1,6 +1,9 @@
 import numpy as np
 import nnfs
 from nnfs.datasets import spiral_data
+import torch
+
+tensor = torch.zeros(12, 8, 8, dtype=torch.float32)
 
 class Layer_Dense:
     def __init__(self, n_inputs, n_neurons):
@@ -60,30 +63,24 @@ X = [[-5, -3, -4, -10, -12, -4, -3, -5,
      1, 1, 1, 1, 0, 1, 1, 1,
      5, 3, 4, 10, 12, 4, 3, 5]]
 
-y = [[-5, -3, -4, -10, -12, -4, -3, -5,
-     -1, -1, -1, -1, -1, -1, -1, -1,
-     0, 0, 0, 0, 0, 0, 0, 0,
-     0, 0, 0, 0, 0, 0, 0, 0,
-     0, 0, 0, 0, 1, 0, 0, 0,
-     0, 0, 0, 0, 0, 0, 0, 0,
-     1, 1, 1, 1, 0, 1, 1, 1,
-     5, 3, 4, 10, 12, 4, 3, 5],
-     [-5, -3, -4, -10, -12, -4, -3, -5,
-     -1, -1, -1, 0, -1, -1, -1, -1,
-     0, 0, 0, 0, 0, 0, 0, 0,
-     0, 0, 0, 0, -1, 0, 0, 0,
-     0, 0, 0, 0, 1, 0, 0, 0,
-     0, 0, 0, 0, 0, 0, 0, 0,
-     1, 1, 1, 1, 0, 1, 1, 1,
-     5, 3, 4, 10, 12, 4, 3, 5]]
+y = [[0],
+     [0]]
 
 dense1 = Layer_Dense(64, 128)
 activation1 = Activation_ReLU()
 dense2 = Layer_Dense(128, 64)
 activation2 = Activation_Softmax()
-dense3 = Layer_Dense(64, 64)
+dense3 = Layer_Dense(64, 1)
 activation3 = Activation_Softmax()
 loss_func = Loss_CC()
+
+with open("data.txt", "r+") as file:
+    print(file.read())
+with open("data.txt", "w+") as file:
+    file.write(str(dense1.weights[0]))
+with open("data.txt", "r+") as file:
+    print(type(file.read()))
+print(dense1.weights)
 
 dense1.forward(X)
 activation1.forward(dense1.output)
@@ -94,6 +91,13 @@ activation3.forward(dense3.output)
 
 print(activation3.output)
 
-loss = loss_func.calculate(activation3.output, y)
+activation_y = Activation_Softmax()
+print("y:")
+print(y)
+activation_y.forward(y)
+y_1 = activation_y.output
+print("y_1:")
+print(y_1)
+loss = loss_func.calculate(activation3.output, y_1)
 
 print(loss)
