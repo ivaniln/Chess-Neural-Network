@@ -20,10 +20,11 @@ class MLP(nn.Module):
         x = self.lin5(x)
         return x
 
-def train_loop(dataloader, model, loss_fn, optimizer, batch_size):
+def train_loop(dataloader, model, loss_fn, optimizer, batch_size, device):
     size = len(dataloader.dataset)
     model.train()
     for batch, (X, y) in enumerate(dataloader):
+        X, y = X.to(device), y.to(device)
         pred = model(X)
         loss = loss_fn(pred, y)
 
@@ -35,7 +36,7 @@ def train_loop(dataloader, model, loss_fn, optimizer, batch_size):
             loss, current = loss.item(), batch * batch_size + len(X)
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
-def test_loop(dataloader, model, loss_fn):
+def test_loop(dataloader, model, loss_fn, device):
     model.eval()
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
@@ -43,6 +44,7 @@ def test_loop(dataloader, model, loss_fn):
 
     with torch.no_grad():
         for X, y in dataloader:
+            X, y = X.to(device), y.to(device)
             pred = model(X)
             test_loss += loss_fn(pred, y).item()
             correct += (abs(pred.argmax(1) - y) < 0.1).type(torch.float).sum().item()
@@ -51,13 +53,13 @@ def test_loop(dataloader, model, loss_fn):
     correct /= size
     print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
 
-def model_learn(model, train_dataloader, test_dataloader, learning_rate = 1e-3, batch_size = 64, epochs = 5):
+def model_learn(model, train_dataloader, test_dataloader, device, learning_rate = 1e-3, batch_size = 64, epochs = 5):
     loss_fn = nn.MSELoss()
     optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
     
     for t in range(epochs):
         print(f"Epoch {t+1}\n-------------------------------")
-        train_loop(train_dataloader, model, loss_fn, optimizer, batch_size)
-        test_loop(test_dataloader, model, loss_fn)
+        train_loop(train_dataloader, model, loss_fn, optimizer, batch_size, device)
+        test_loop(test_dataloader, model, loss_fn, device)
 
     print("Done!")

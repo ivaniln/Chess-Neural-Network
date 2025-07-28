@@ -14,31 +14,40 @@ def boardToTensor(board: chess.Board) -> torch.Tensor:
             col = square % 8
             idx = piece_num[piece.symbol()]
             tensor[idx, row, col] = 1.0
-    return tensor
+    return tensor.to(device)
 
 device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"
-model = MLP_AI.MLP().to(device)
 print(f"Using {device} device")
+
+model = MLP_AI.MLP().to(device)
 model_path = "model.pt"
+train_data_path = "train_data.pt"
+test_data_path = "test_data.pt"
 
-try:
-    user_choice = input("Do you want to learn a new model or use existing (l/e): ")
+dataset_choice = input("Do you want to generate a NEW dataset or use EXISTING (n/e): ")
 
-    if user_choice == "l":
-        train_dataset = Datasets_gen.ChessDataset(size=64000)
-        test_dataset = Datasets_gen.ChessDataset(size=640)
+if dataset_choice == "n":
+    train_dataset = Datasets_gen.ChessDataset(size=64000)
+    test_dataset = Datasets_gen.ChessDataset(size=640)
 
-        train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
-        test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=64)
+    train_dataset.save(train_data_path)
+    test_dataset.save(test_data_path)
+else:
+    train_dataset = Datasets_gen.load_dataset("train_data.pt")
+    test_dataset = Datasets_gen.load_dataset("test_data.pt")
 
-        MLP_AI.model_learn(model, train_dataloader, test_dataloader, epochs=15, learning_rate=0.001)
-        torch.save(model.state_dict(), model_path)
-        print("Model created and saved!")
-    else:
-        model.load_state_dict(torch.load(model_path))
-        print("Model loaded!")
-except:
-    print("No model exists.")
+model_choice = input("Do you want to learn a NEW model or use EXISTING (n/e): ")
+
+if model_choice == "n":
+    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=64, shuffle=True)
+    test_dataloader = torch.utils.data.DataLoader(test_dataset, batch_size=64)
+
+    MLP_AI.model_learn(model, train_dataloader, test_dataloader, device, epochs=15, learning_rate=0.001)
+    torch.save(model.state_dict(), model_path)
+    print("Model created and saved!")
+else:
+    model.load_state_dict(torch.load(model_path))
+    print("Model loaded!")
 
 board = chess.Board()
 print(board)

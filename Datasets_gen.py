@@ -21,13 +21,14 @@ class ChessDataset(torch.utils.data.Dataset):
         super().__init__()
         self.size = size
         self.data = []
-        x = []
+        self.x = []
+        self.y = []
 
         print("Creating dataset inputs.")
-        while len(x) < size*2:
+        while len(self.x) < size*2:
             board = chess.Board()
             for i in range(200):
-                x.append(board.copy())
+                self.x.append(board.copy())
                 move = random.choice(list(board.legal_moves))
                 board.push(move)
                 if board.is_game_over():
@@ -38,15 +39,16 @@ class ChessDataset(torch.utils.data.Dataset):
                     break
         
         print("Creating dataset outputs.")
-        x = random.choices(x, k=size)
+        self.x = random.choices(self.x, k=size)
         engine = chess.engine.SimpleEngine.popen_uci("stockfish/stockfish-windows-x86-64-avx2.exe")
-        for position in x:
+        for position in self.x:
             info = engine.analyse(position, chess.engine.Limit(depth=10))
             if info["score"].is_mate():
-                y = 10
+                y_cur = 10
             else:
-                y = info["score"].relative.cp / 100
-            self.data.append((boardToTensor(position), torch.Tensor([y])))
+                y_cur = info["score"].relative.cp / 100
+            self.data.append((boardToTensor(position), torch.Tensor([y_cur])))
+            self.y.append(y_cur)
         engine.quit()
         print("Dataset created!")
 
@@ -55,6 +57,19 @@ class ChessDataset(torch.utils.data.Dataset):
     
     def __getitem__(self, index):
         return self.data[index]
+    
+    def save(self, path):
+        x1 = []
+        for x in self.x:
+            x = boardToTensor(x)
+            x1.append(x)
+        torch.save((x1, list(torch.Tensor(self.y))), path)
+    
+def load_dataset(path):
+    data, targets = torch.load(path)
+    dataset = torch.utils.data.TensorDataset(torch.stack(data), torch.stack(targets).unsqueeze(1))
+    return dataset
+
     """
 data = ChessDataset(64)
 loader = torch.utils.data.DataLoader(data, batch_size=32, shuffle=True)
