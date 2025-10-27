@@ -69,11 +69,11 @@ Example console flow:
 > 
 (Board printed)
 
-Your move in uci format: e2e4
-
-Machines move: d7d5
-
-Position has value: -0.342
+> Your move in uci format: e2e4
+> 
+> Machines move: d7d5
+> 
+> Position has value: -0.342
 
 ---
 
