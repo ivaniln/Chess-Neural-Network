@@ -35,7 +35,7 @@ The main script handles dataset generation, model training, and an interactive c
 ---
 
 ## How it works
-1. **Run the main script**
+ **Run the main script**
 python board.py
 
 On startup, the script will ask:
@@ -59,8 +59,6 @@ The AI evaluates each legal move and responds with the one it considers best.
 The console shows board state and evaluation values after each move.
 
 ## Example usage
-bash
-Копіювати код
 Start the project (no additional setup required)
 python board.py
 
