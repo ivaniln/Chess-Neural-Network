@@ -62,13 +62,13 @@ The console shows board state and evaluation values after each move.
 Start the project (no additional setup required)
 python board.py
 
-/ Example console flow:
-/ > Do you want to generate a NEW dataset or use EXISTING (n/e): e
-/ > Do you want to learn a NEW model or use EXISTING (n/e): e
-/ (Board printed)
-/ Your move in uci format: e2e4
-/ Machines move: d7d5
-/ Position has value: -0.342
+Example console flow:
+> Do you want to generate a NEW dataset or use EXISTING (n/e): e
+> Do you want to learn a NEW model or use EXISTING (n/e): e
+(Board printed)
+Your move in uci format: e2e4
+Machines move: d7d5
+Position has value: -0.342
 
 ---
 
